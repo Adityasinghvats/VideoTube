@@ -1,0 +1,1 @@
+Each models gets a controller and each controller gets a route
