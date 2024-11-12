@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express()
 
@@ -15,7 +16,8 @@ app.use(express.json({limit:"16kb"}));
 // allow data in url encoded format 
 app.use(express.urlencoded({extended: true, limit:"16kb"}))
 // serving assets like images , css
-app.use(express.static("[ublic"))
+app.use(express.static("public"))
+app.use(cookieParser())
 
 // import Routes
 import healthcheckRouter from "./routes/healthcheck.route.js";
