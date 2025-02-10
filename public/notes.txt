@@ -1,1 +1,6 @@
-Each models gets a controller and each controller gets a route
+Each models gets a controller and each controller gets a route/
+When a user login in first lets assume acess token of 15 min created and refresh token
+of 1 day created, and server sends it to client and db .
+Client get the accesstoken and use it for access.
+Once 15 min over server sens error 401 and sends it to route /refresh to make a new token and 
+make a new access and refresh token and sends it to db as well as client
