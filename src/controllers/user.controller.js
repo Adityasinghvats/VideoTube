@@ -4,6 +4,28 @@ import {User} from "../models/user.models.js";
 import {uploadOnCloudinary, deleteFromCloudinary} from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+const genrateAccessAndRefreshToken = async(userId) => {
+    try {
+        const user = await User.findById(userId)
+        if(!user){
+            throw new ApiError(500, "User not found while trying to genrate access and refresh token")
+        }
+    
+        //using the user genrate access and refresh
+        const accessToken = user.generateAccessToken()
+        const refreshToken = user.generateRefreshToken()
+    
+        user.refreshToken = refreshToken
+        //save the user in db along with refresh token
+        await user.save({validateBeforeSave: false})
+        return {accessToken, refreshToken}
+    } catch (error) {
+        console.log("Failed to generate access and refresh token", error);
+        
+        throw new ApiError(500, "Failed to generate access and refresh token")
+    }
+}
+
 const registerUser = asyncHandler( async(req, res) => {
     const {fullname, email, username, password} = req.body
 
@@ -68,7 +90,7 @@ const registerUser = asyncHandler( async(req, res) => {
         })
         // console.log(user)
     
-        //returns back every field even password so twe need to de selct somethings
+        //returns back every field even password so twe need to de select somethings
         const createdUser = await User.findById(user._id).select(
             "-password -refreshToken"
         )
@@ -91,6 +113,57 @@ const registerUser = asyncHandler( async(req, res) => {
     }
 })
 
+const loginUser = asyncHandler( async(req, res) => {
+    //get data from body
+    const {username, email, password} = req.body
+    if(!email || !password){
+        throw new ApiError(400, "Email and password is required");
+    }
+    //check for user
+    const user = await User.findOne({
+        $or: [{username}, {email}]
+    })
+    if(!user){
+        throw new ApiError(409, "User with email or username not found")
+    }
+
+    //validate password
+    const isPasswordValid = await user.isPasswordCorrect(password);
+    if(!isPasswordValid){
+        throw new ApiError(409, "Invalid user credentials");
+    }
+
+    //generate and get hold of them
+    const {accessToken, refreshToken} = await 
+    genrateAccessAndRefreshToken(user._id);
+
+    //get user from db
+    const loggedInUser = await User.findById(user,_id)
+    .select("-password -refreshToken")
+    if(!loggedInUser){
+        throw new ApiError(409, "Logged in user not found in DB");
+    }
+
+    //options to send logged in details to user
+    //httponly true makes cookies non modifiable by client side
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+    }
+
+    //send all of this data
+    return res.status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json( new ApiResponse(
+        200, 
+        {user: loggedInUser, accessToken: accessToken}, 
+        "User logged in successfully"
+    ))
+    //in case your want to use for mobile devices , they cannot access cookies
+})
+
 export{
-    registerUser
+    registerUser,
+    loginUser
 }
