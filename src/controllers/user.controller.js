@@ -139,7 +139,7 @@ const loginUser = asyncHandler( async(req, res) => {
     generateAccessAndRefreshToken(user._id);
 
     //get user from db
-    const loggedInUser = await User.findById(user,_id)
+    const loggedInUser = await User.findById(user._id)
     .select("-password -refreshToken")
     if(!loggedInUser){
         throw new ApiError(409, "Logged in user not found in DB");
