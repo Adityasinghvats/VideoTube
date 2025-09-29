@@ -1,0 +1,3 @@
+- setup CI/CD using testing and github actions to make docker image and uplaod to my docker hub.
+- setup obersvalbiltiy and logging
+- setup redis
