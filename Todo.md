@@ -2,3 +2,4 @@
 - setup obersvalbiltiy and logging using OTEL
 - setup backnground processing and worker threads and bullmq queue for file upload
 - setup logging using better stack blog
+- send notifications using fcm or websockets

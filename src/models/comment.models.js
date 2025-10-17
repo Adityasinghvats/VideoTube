@@ -1,8 +1,8 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
-const commentSchema = new mongoose(
-    { 
+const commentSchema = new Schema(
+    {
         content: {
             type: String,
             required: true
@@ -16,7 +16,7 @@ const commentSchema = new mongoose(
             ref: "User"
         }
     },
-    {timestamps: true}
+    { timestamps: true }
 )
 commentSchema.plugin(mongooseAggregatePaginate) //add aggregation
 

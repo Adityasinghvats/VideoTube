@@ -1,34 +1,23 @@
-import mongoose, { isValidObjectId } from "mongoose"
+import { isValidObjectId } from "mongoose"
 import { Video } from "../models/video.models.js"
-import { User } from "../models/user.models.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { getVideoDuration } from "../utils/ffmpeg.js"
 
-
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
+    const { page = 1, limit = 10, query, sortBy, sortType } = req.query
     if (!req.user) {
         throw new ApiError(401, "User not found")
     }
 
     const match = {
         ...(query ? { title: { $regex: query, $options: "i" } } : {}),//if query exists, match titles that contains the searchterm (case-insensitive)
-        ...(userId ? { owner: mongoose.Types.ObjectId(userId) } : {}),
     }
 
     const videos = await Video.aggregate([
         { $match: match },
-        {
-            $lookup: {
-                from: "users",
-                localField: "owner",
-                foreignField: "_id",
-                as: "VideosByOwner",
-            },
-        },
         {
             $project: {
                 videoFile: 1,
@@ -38,9 +27,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
                 duration: 1, // Video duration
                 views: 1, // Number of views
                 isPublished: 1, // Whether the video is published or not
-                owner: {
-                    $arrayElemAt: ["$videosByOwner", 0], // Extracts the first user object from the array
-                },
+                owner: 1,
             }
         },
         {
@@ -65,29 +52,35 @@ const getAllVideos = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, videos, "Videos fetched successfully"));
 })
 
-const publishAVideo = asyncHandler(async (req, res) => {
-    const { title, description, owner } = req.body
+const publishVideo = asyncHandler(async (req, res) => {
+    const { title, description } = req.body
+    if (!req.user) {
+        throw new ApiError(401, "User not authenticated");
+    }
+    const owner = req.user._id;
     if (!title) {
         throw new ApiError(400, "Title cannot be empty")
     }
     if (!description) {
         throw new ApiError(400, "Description cannot be empty")
     }
-    const videoFileLocalPath = req.files?.videoFile[0]?.path;
+    const videoFileLocalPath = req.files?.videoFile?.[0]?.path;
     if (!videoFileLocalPath) {
         throw new ApiError(400, "VideoFile is required")
     }
-    const thumbnailLocalPath = req.files?.thumbnail[0]?.path;
+    const thumbnailLocalPath = req.files?.thumbnail?.[0]?.path;
     if (!thumbnailLocalPath) {
         throw new ApiError(400, "Thumbnail is required")
     }
     try {
         const duration = await getVideoDuration(videoFileLocalPath);
-        const videoFile = await uploadOnCloudinary(videoFileLocalPath);
+        const [videoFile, thumbnail] = await Promise.all([
+            uploadOnCloudinary(videoFileLocalPath),
+            uploadOnCloudinary(thumbnailLocalPath)
+        ]);
         if (!videoFile) {
             throw new ApiError(400, "Cloudinary error: Video file is required");
         }
-        const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
         if (!thumbnail) {
             throw new ApiError(400, "Cloudinary error: Thumbnail file is required")
         }
@@ -96,10 +89,10 @@ const publishAVideo = asyncHandler(async (req, res) => {
             thumbnail: thumbnail.url,
             title,
             description,
-            owner: req.user?._id,
+            owner,
             duration,
         })
-        console.log(` Title: ${title}, Owner: ${owner}, duration: ${duration}`);
+
         if (!video) {
             throw new ApiError(500, "Somwthing went wrong while publishing video")
         }
@@ -198,7 +191,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
 
 export {
     getAllVideos,
-    publishAVideo,
+    publishVideo,
     getVideoById,
     updateVideo,
     deleteVideo,

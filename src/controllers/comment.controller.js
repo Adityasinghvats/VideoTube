@@ -3,7 +3,6 @@ import { Comment } from "../models/comment.models.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
-import { parse } from "dotenv"
 
 const getVideoComments = asyncHandler(async (req, res) => {
     const { videoId } = req.params
@@ -36,8 +35,11 @@ const getVideoComments = asyncHandler(async (req, res) => {
         {
             $lookup: {
                 from: "users",
-                localField: "owner",
-                foreignField: "_id",
+                let: { ownerId: "$owner" },
+                pipeline: [
+                    { $match: { $expr: { $eq: ["$_id", "$$ownerId"] } } },
+                    { $project: { password: 0, refreshToken: 0 } } // exclude sensitive fields here
+                ],
                 as: "OwnerOfComment"
             }
         },
@@ -60,7 +62,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
             $limit: parseInt(limit),
         }
     ])
-    console.log(`Fetched ${comments} for videoId: ${videoId}`);
+    console.log(comments);
 
     if (!comments?.length) {
         throw new ApiError(404, "Comments not found");
@@ -99,7 +101,7 @@ const addComment = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(200, addComment, videoId, "Comment added successfully"));
+        .json(new ApiResponse(200, addComment, "Comment added successfully"));
 })
 
 const updateComment = asyncHandler(async (req, res) => {
@@ -113,6 +115,14 @@ const updateComment = asyncHandler(async (req, res) => {
     }
     if (!content) {
         throw new ApiError(400, "Empty or null fields are invalid");
+    }
+    // make sure only owner can update the comment
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+        throw new ApiError(404, "Comment not found");
+    }
+    if (String(req.user._id) !== String(comment.owner)) {
+        throw new ApiError(403, "You are not allowed to update this comment");
     }
     const updateComment = await Comment.findOneAndUpdate(
         {
@@ -143,6 +153,13 @@ const deleteComment = asyncHandler(async (req, res) => {
     }
     if (!req.user) {
         throw new ApiError(401, "No user found")
+    }
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+        throw new ApiError(404, "Comment not found");
+    }
+    if (String(req.user._id) !== String(comment.owner)) {
+        throw new ApiError(403, "You are not allowed to delete this comment");
     }
 
     const deleteComment = await Comment.findOneAndDelete({

@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 import { addIndexedData, updateIndexedData, deleteIndexedData } from "../utils/elasticUtility.js";
 
-const videoSchema = new mongoose(
+const videoSchema = new Schema(
     {
         videoFile: {
             type: String,
@@ -22,11 +22,13 @@ const videoSchema = new mongoose(
         },
         views: {
             type: Number,
-            required: 0 //default value was given as 0
+            required: true,
+            default: 0
         },
         duration: {
             type: Number,
-            required: true
+            required: true,
+            default: 0
         },
         isPublished: {
             type: Boolean,
@@ -44,20 +46,20 @@ videoSchema.plugin(mongooseAggregatePaginate);
 
 export const Video = mongoose.model("Video", videoSchema);
 
-Video.watch().on('change', async (change) => {
-    console.log('Change detected in video model:', change);
+// Video.watch().on('change', async (change) => {
+//     console.log('Change detected in video model:', change);
 
-    switch (change.operationType) {
-        case 'insert':
-            addIndexedData(change, 'videos');
-            break;
+//     switch (change.operationType) {
+//         case 'insert':
+//             addIndexedData(change, 'videos');
+//             break;
 
-        case 'update':
-            updateIndexedData(change, 'videos');
-            break;
+//         case 'update':
+//             updateIndexedData(change, 'videos');
+//             break;
 
-        case 'delete':
-            deleteIndexedData(change, 'videos');
-            break;
-    }
-});
+//         case 'delete':
+//             deleteIndexedData(change, 'videos');
+//             break;
+//     }
+// });

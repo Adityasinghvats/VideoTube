@@ -8,7 +8,9 @@ const app = express()
 app.use(
     cors({
         origin: process.env.CORS_ORIGIN,
-        credentials: true
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization']
     })
 )
 // all json data is allowed to come in limit 
@@ -27,7 +29,10 @@ import videoRouter from "./routes/video.route.js";
 import commentRouter from "./routes/comment.route.js";
 import playlistRouter from "./routes/playlist.route.js";
 import subscriptionRouter from "./routes/subscription.route.js";
-import notificationRouter from "./routes/notification.route.js";
+import likeRouter from "./routes/like.route.js";
+import tweetRouter from "./routes/tweet.route.js";
+import dashboardRouter from "./routes/dashboard.route.js";
+// import notificationRouter from "./routes/notification.route.js";
 import { errorHandler } from "./middlewares/error.middlewares.js";
 
 // routes
@@ -38,7 +43,10 @@ app.use("/api/v1/videos", videoRouter);
 app.use("/api/v1/comments", commentRouter);
 app.use("/api/v1/playlists", playlistRouter);
 app.use("/api/v1/subscriptions", subscriptionRouter);
-app.use("/api/v1/notifications", notificationRouter);
+app.use("/api/v1/likes", likeRouter);
+app.use("/api/v1/tweets", tweetRouter);
+app.use("/api/v1/dashboard", dashboardRouter);
+// app.use("/api/v1/notifications", notificationRouter);
 
 app.use(errorHandler)
 
