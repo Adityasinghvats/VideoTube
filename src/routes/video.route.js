@@ -12,6 +12,18 @@ import { upload } from "../middlewares/multer.middlewares.js"
 
 const router = Router();
 
+/**
+ * @openapi
+ * /api/v1/videos:
+ *   get:
+ *     summary: Get video data
+ *     tags: [Videos]
+ *     responses:
+ *       200:
+ *         description: Video data fetched successfully
+ *       500:
+ *         description: Failed to fetch video data
+ */
 router
     .route("/")
     .get(verifyJWT, getAllVideos)

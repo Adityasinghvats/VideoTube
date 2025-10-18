@@ -1,8 +1,8 @@
 import { Router } from "express";
 import {
-    registerUser, 
-    logoutUser, 
-    loginUser, 
+    registerUser,
+    logoutUser,
+    loginUser,
     refreshAccessToken,
     changeCurrentPassword,
     getCurrentUser,
@@ -12,20 +12,39 @@ import {
     updateUserCoverImage,
     getWatchHistory
 } from "../controllers/user.controller.js";
-import {upload} from "../middlewares/multer.middlewares.js"
-import {verifyJWT} from "../middlewares/auth.middlewares.js"
+import { upload } from "../middlewares/multer.middlewares.js"
+import { verifyJWT } from "../middlewares/auth.middlewares.js"
 
 const router = Router();
 
-//unsecure routes
+/**
+ * @openapi
+ * /api/v1/users/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Users]
+ *     responses:
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *               coverImage:
+ *                 type: string
+ *                 format: binary
+ */
 router.route("/register").post(
     upload.fields([
         {
             name: "avatar",
             maxCount: 1
-        },{
+        }, {
             name: "coverImage",
-            maxCount: 1 
+            maxCount: 1
         }
     ]),
     registerUser

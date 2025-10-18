@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { swaggerSpec } from "./utils/swagger.js";
+import swaggerUi from "swagger-ui-express";
 
 const app = express()
 
@@ -20,6 +22,18 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }))
 // serving assets like images , css
 app.use(express.static("public"))
 app.use(cookieParser())
+
+app.get('/api-docs.json', (req, res) => {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const spec = { ...swaggerSpec, servers: [{ url: baseUrl }] };
+    res.setHeader('Content-Type', 'application/json');
+    res.send(spec);
+});
+
+// add flag or auth for api-docs endpoint in production
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(undefined, {
+    swaggerOptions: { url: '/api-docs.json' }
+}));
 
 // import Routes
 import healthcheckRouter from "./routes/healthcheck.route.js";
