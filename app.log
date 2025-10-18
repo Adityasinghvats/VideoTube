@@ -1,0 +1,29 @@
+{"level":"info","message":"Search query:","query":"demo","timestamp":"2025-10-18T08:55:43.307Z"}
+{"count":1,"level":"info","message":"Search results:","timestamp":"2025-10-18T08:55:43.310Z"}
+{"level":"info","message":"Tweet index already exists","timestamp":"2025-10-18T08:57:52.539Z"}
+{"level":"info","message":"Video index already exists","timestamp":"2025-10-18T08:57:52.544Z"}
+{"level":"info","message":"Tweet index already exists","timestamp":"2025-10-18T09:00:35.308Z"}
+{"level":"info","message":"Video index already exists","timestamp":"2025-10-18T09:00:35.312Z"}
+{"level":"info","message":"Tweet index already exists","timestamp":"2025-10-18T09:00:46.235Z"}
+{"level":"info","message":"Video index already exists","timestamp":"2025-10-18T09:00:46.239Z"}
+{"documentKey":{"_id":"68f350880356040a29e4f18f"},"level":"info","message":"Change detected in tweet model:","operationType":"delete","timestamp":"2025-10-18T09:02:33.577Z"}
+{"level":"info","message":"Search query:","query":"aditi","timestamp":"2025-10-18T09:02:43.562Z"}
+{"count":0,"level":"info","message":"Search results:","timestamp":"2025-10-18T09:02:43.562Z"}
+{"level":"info","message":"Tweet index already exists","timestamp":"2025-10-18T09:03:11.318Z"}
+{"level":"info","message":"Video index already exists","timestamp":"2025-10-18T09:03:11.321Z"}
+{"level":"info","message":"Tweet index already exists","timestamp":"2025-10-18T09:03:46.676Z"}
+{"level":"info","message":"Video index already exists","timestamp":"2025-10-18T09:03:46.679Z"}
+{"level":"info","message":"Video index already exists","timestamp":"2025-10-18T09:03:55.100Z"}
+{"level":"info","message":"Tweet index already exists","timestamp":"2025-10-18T09:03:55.104Z"}
+{"level":"info","message":"Tweet index already exists","timestamp":"2025-10-18T09:05:33.252Z"}
+{"level":"info","message":"Video index already exists","timestamp":"2025-10-18T09:05:33.256Z"}
+{"documentKey":{"_id":"68f356b9e81a20377f67faae"},"level":"info","message":"Change detected in tweet model","operationType":"update","timestamp":"2025-10-18T09:06:58.397Z"}
+{"level":"info","message":"Video index already exists","timestamp":"2025-10-18T09:09:53.771Z"}
+{"level":"info","message":"Tweet index already exists","timestamp":"2025-10-18T09:09:53.775Z"}
+{"level":"info","message":"Video index already exists","timestamp":"2025-10-18T09:12:52.589Z"}
+{"level":"info","message":"Tweet index already exists","timestamp":"2025-10-18T09:12:52.593Z"}
+{"documentKey":{"_id":"68f356b9e81a20377f67faae"},"level":"info","message":"Change detected in tweet model","operationType":"update","timestamp":"2025-10-18T09:12:58.832Z"}
+{"level":"info","message":"Tweet index already exists","timestamp":"2025-10-18T09:16:07.744Z"}
+{"level":"info","message":"Video index already exists","timestamp":"2025-10-18T09:16:07.747Z"}
+{"level":"info","message":"Tweet index already exists","timestamp":"2025-10-18T09:16:19.193Z"}
+{"level":"info","message":"Video index already exists","timestamp":"2025-10-18T09:16:19.196Z"}

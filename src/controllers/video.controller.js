@@ -11,6 +11,9 @@ const getAllVideos = asyncHandler(async (req, res) => {
     if (!req.user) {
         throw new ApiError(401, "User not found")
     }
+    const allowedSortFields = ["createdAt", "views", "duration", "isPublished"];
+    const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
+    const sortOrder = sortType === "desc" ? 1 : -1;
 
     const match = {
         ...(query ? { title: { $regex: query, $options: "i" } } : {}),//if query exists, match titles that contains the searchterm (case-insensitive)
@@ -18,6 +21,17 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
     const videos = await Video.aggregate([
         { $match: match },
+        {
+            $lookup: {
+                from: "users",
+                let: { ownerId: "$owner" },
+                pipeline: [
+                    { $match: { $expr: { $eq: ["$_id", "$$ownerId"] } } },
+                    { $project: { password: 0, refreshToken: 0, watchHistory: 0, email: 0, coverImage: 0 } } // exclude sensitive fields here
+                ],
+                as: "videosByOwner"
+            },
+        },
         {
             $project: {
                 videoFile: 1,
@@ -27,12 +41,14 @@ const getAllVideos = asyncHandler(async (req, res) => {
                 duration: 1, // Video duration
                 views: 1, // Number of views
                 isPublished: 1, // Whether the video is published or not
-                owner: 1,
+                owner: {
+                    $arrayElemAt: ["$videosByOwner", 0], // Extracts the first user object from the array
+                },
             }
         },
         {
             $sort: {
-                [sortBy]: sortType === "desc" ? -1 : 1,
+                [sortField]: sortOrder,
             }
         },
         {

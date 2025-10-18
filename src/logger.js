@@ -1,4 +1,4 @@
-import { createLogger, format, level, transports } from "winston";
+import { createLogger, format, transports } from "winston";
 const { combine, timestamp, json, colorize } = format;
 
 const consoleformat = format.combine(

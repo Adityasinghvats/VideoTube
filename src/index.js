@@ -15,8 +15,8 @@ connectdb()
         app.listen(port, () => {
             console.log(`App running a port :${port}`);
         })
-        // createTweetIndex()
-        // createVideoIndex()
+        createTweetIndex()
+        createVideoIndex()
     })
     .catch((err) => {
         console.log("Mongodb connection error", err);

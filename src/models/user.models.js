@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
-import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
+import bcrypt from "bcryptjs";
 
 // mongodb will automatically add _id
 const userSchema = new Schema(

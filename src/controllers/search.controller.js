@@ -11,17 +11,52 @@
  */
 import { asyncHandler } from "../utils/asyncHandler.js";
 import searchClient from "../utils/elasticClient.js"
-
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 const search = asyncHandler(async (req, res) => {
     const query = req.query.q;
+    if (!query || query.trim() === '') {
+        throw new ApiError(400, "Search query is required");
+    }
     const result = await searchClient.search({
         index: ['tweets', 'videos'],
         body: {
             query: {
-                multi_match: {
-                    query: query,
-                    fields: ['content^2', 'title^3', 'description']
+                bool: {
+                    should: [
+                        {
+                            multi_match: {
+                                query: query,
+                                fields: ['content^2', 'title^3', 'description'],
+                                fuzziness: 'AUTO'
+                            }
+                        },
+                        {
+                            wildcard: {
+                                content: {
+                                    value: `*${query}*`,
+                                    boost: 1.5
+                                }
+                            }
+                        },
+                        {
+                            wildcard: {
+                                title: {
+                                    value: `*${query}*`,
+                                    boost: 2
+                                }
+                            }
+                        },
+                        {
+                            wildcard: {
+                                description: {
+                                    value: `*${query}*`
+                                }
+                            }
+                        }
+                    ],
+                    minimum_should_match: 1
                 }
             },
             highlight: {
@@ -33,7 +68,7 @@ const search = asyncHandler(async (req, res) => {
             }
         }
     })
-    if (!result?.length) {
+    if (!result.hits?.hits?.length) {
         throw new ApiError(400, "Search results not found");
     }
 

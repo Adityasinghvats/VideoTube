@@ -1,0 +1,362 @@
+openapi: 3.0.0
+info:
+  title: Videotube
+  version: 1.0.0
+  description: ""
+servers:
+  - url: "{{videotube}}"
+paths:
+  /healthcheck:
+    get:
+      summary: New Request
+      tags:
+        - healthcheck
+      responses: {}
+  /users/register:
+    post:
+      summary: registeruser
+      tags:
+        - users
+      responses: {}
+  /users/login:
+    post:
+      summary: login
+      tags:
+        - users
+      responses: {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+  /users/logout:
+    post:
+      summary: logout
+      tags:
+        - users
+      responses: {}
+  /users/refresh-token:
+    post:
+      summary: refresh-token
+      tags:
+        - users
+      responses: {}
+  /users/current-user:
+    get:
+      summary: get-user
+      tags:
+        - users
+      responses: {}
+  /users/history:
+    get:
+      summary: watchhistory
+      tags:
+        - users
+      responses: {}
+  /users/c/aditya:
+    get:
+      summary: userprofile
+      tags:
+        - users
+      responses: {}
+  /users/change-password:
+    post:
+      summary: changepassword
+      tags:
+        - users
+      responses: {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oldPassword:
+                  type: string
+                newPassword:
+                  type: string
+  /users/update-account:
+    patch:
+      summary: updateaccount
+      tags:
+        - users
+      responses: {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullname:
+                  type: string
+                email:
+                  type: string
+                  format: email
+  /users/avatar:
+    patch:
+      summary: updateavatar
+      tags:
+        - users
+      responses: {}
+  /videos/:
+    get:
+      summary: allvideos
+      tags:
+        - videos
+      responses: {}
+    post:
+      summary: postvideo
+      tags:
+        - videos
+      responses: {}
+  /videos/68f25f86b5191008dd6c946e:
+    get:
+      summary: getvideobyid
+      tags:
+        - videos
+      responses: {}
+    delete:
+      summary: delete
+      tags:
+        - videos
+      responses: {}
+  /videos/toggle/publish/68f269af6cf5d3eb7e9c99a8:
+    patch:
+      summary: togglePublish
+      tags:
+        - videos
+      responses: {}
+  /videos/68f269af6cf5d3eb7e9c99a8:
+    patch:
+      summary: update
+      tags:
+        - videos
+      responses: {}
+  /tweets/:
+    post:
+      summary: create
+      tags:
+        - tweets
+      responses: {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+    get:
+      summary: getAllTweets
+      tags:
+        - tweets
+      responses: {}
+  /tweets/user/68f350190356040a29e4f17d:
+    get:
+      summary: getTweets
+      tags:
+        - tweets
+      responses: {}
+  /tweets/68f333d731bd90df3fdbc6a6:
+    patch:
+      summary: updateTweet
+      tags:
+        - tweets
+      responses: {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+    delete:
+      summary: deleteTweet
+      tags:
+        - tweets
+      responses: {}
+  /playlists/:
+    post:
+      summary: create
+      tags:
+        - playlists
+      responses: {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+  /playlists/68f3301b810a3bd48ae2ca9c:
+    get:
+      summary: getplaylist
+      tags:
+        - playlists
+      responses: {}
+  /playlists/68f32f04810a3bd48ae2ca91:
+    patch:
+      summary: updateplaylist
+      tags:
+        - playlists
+      responses: {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+    delete:
+      summary: New Request
+      tags:
+        - playlists
+      responses: {}
+  /playlists/add/68f26cf370c29b2b27d3489a/68f3301b810a3bd48ae2ca9c:
+    patch:
+      summary: addVideo
+      tags:
+        - playlists
+      responses: {}
+  /playlists/remove/68f26cf370c29b2b27d3489a/68f3301b810a3bd48ae2ca9c:
+    patch:
+      summary: removeVideo
+      tags:
+        - playlists
+      responses: {}
+  /playlists/user/68f2539c6b3966dadf4b6788:
+    get:
+      summary: userPlaylistByUserId
+      tags:
+        - playlists
+      responses: {}
+  /subscriptions/c:
+    get:
+      summary: getSubscriptions
+      tags:
+        - subscriptions
+      responses: {}
+  /subscriptions/u/:
+    get:
+      summary: getUserChannelSubscribers
+      tags:
+        - subscriptions
+      responses: {}
+  /subscriptions/c/68f2539c6b3966dadf4b6788:
+    post:
+      summary: subscribeToChannel
+      tags:
+        - subscriptions
+      responses: {}
+  /likes/toggle/v/68f269af6cf5d3eb7e9c99a8:
+    post:
+      summary: likeVideo
+      tags:
+        - likes
+      responses: {}
+  /likes/toggle/c/68f2777da4e815af47f9219f:
+    post:
+      summary: likeComment
+      tags:
+        - likes
+      responses: {}
+  /likes/toggle/t/68f3358a14189adb200d50a6:
+    post:
+      summary: likeTweet
+      tags:
+        - likes
+      responses: {}
+  /likes/videos:
+    get:
+      summary: getLikedVideos
+      tags:
+        - likes
+      responses: {}
+  /comments/68f25f86b5191008dd6c946e:
+    get:
+      summary: getVideoComments
+      tags:
+        - comments
+      responses: {}
+    post:
+      summary: addVideoComments
+      tags:
+        - comments
+      responses: {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+  /comments/c/68f273d03c9d6676608c355d:
+    delete:
+      summary: deletecomment
+      tags:
+        - comments
+      responses: {}
+    patch:
+      summary: updateComment
+      tags:
+        - comments
+      responses: {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+  /dashboard/videos:
+    get:
+      summary: getAllUserVideos
+      tags:
+        - dashboard
+      parameters:
+        - name: sortType
+          in: query
+          required: false
+          schema:
+            deprecated: false
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            deprecated: false
+      responses: {}
+  /dashboard/stats:
+    get:
+      summary: getChannelStats
+      tags:
+        - dashboard
+      responses: {}
+  /search/s:
+    get:
+      summary: search
+      tags:
+        - es-search
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            deprecated: false
+      responses: {}

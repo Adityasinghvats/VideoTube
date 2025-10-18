@@ -11,6 +11,9 @@ const getChannelStats = asyncHandler(async (req, res) => {
     // find count of all Subscriptions where channel value is same as user
     // find count of all the likes for comments and video where video owner is user
     // find count of all the likes for tweets where owner is user
+    return res
+        .status(200)
+        .json(new ApiResponse(200, "Stats fetched successfully"));
 })
 
 const getChannelVideos = asyncHandler(async (req, res) => {
@@ -21,10 +24,13 @@ const getChannelVideos = asyncHandler(async (req, res) => {
     if (!userId) {
         throw new ApiError(401, "User not found")
     }
+    const allowedSortFields = ["createdAt", "views", "duration", "isPublished"];
+    const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
+    const sortOrder = sortType === "desc" ? 1 : -1;
 
     const match = {
         ...(query ? { title: { $regex: query, $options: "i" } } : {}),//if query exists, match titles that contains the searchterm (case-insensitive)
-        ...(userId ? { owner: mongoose.Types.ObjectId(userId) } : {}),
+        ...(userId ? { owner: new mongoose.Types.ObjectId(userId) } : {}),
     }
 
     const videos = await Video.aggregate([
@@ -32,9 +38,12 @@ const getChannelVideos = asyncHandler(async (req, res) => {
         {
             $lookup: {
                 from: "users",
-                localField: "owner",
-                foreignField: "_id",
-                as: "VideosByOwner",
+                let: { ownerId: "$owner" },
+                pipeline: [
+                    { $match: { $expr: { $eq: ["$_id", "$$ownerId"] } } },
+                    { $project: { password: 0, refreshToken: 0 } } // exclude sensitive fields here
+                ],
+                as: "videosByOwner"
             },
         },
         {
@@ -46,14 +55,11 @@ const getChannelVideos = asyncHandler(async (req, res) => {
                 duration: 1, // Video duration
                 views: 1, // Number of views
                 isPublished: 1, // Whether the video is published or not
-                owner: {
-                    $arrayElemAt: ["$videosByOwner", 0], // Extracts the first user object from the array
-                },
             }
         },
         {
             $sort: {
-                [sortBy]: sortType === "desc" ? -1 : 1,
+                [sortField]: sortOrder,
             }
         },
         {

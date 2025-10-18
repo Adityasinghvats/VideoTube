@@ -33,16 +33,23 @@ const getUserTweets = asyncHandler(async (req, res) => {
         owner: userId
     }).sort({ createdAt: -1 })
     if (!tweets || tweets.length === 0) {
-        throw new Error(404, "Tweets not found")
+        throw new ApiError(404, "Tweets not found")
     }
     return res
         .status(200)
         .json(new ApiResponse(200, tweets, "User tweets fetched successfully"))
 })
 
+const getAllTweets = asyncHandler(async (req, res) => {
+    const tweets = await Tweet.find().sort({ createdAt: -1 });
+    return res
+        .status(200)
+        .json(new ApiResponse(200, tweets, "All tweets fetched successfully"));
+})
+
 const updateTweet = asyncHandler(async (req, res) => {
     const { tweetId } = req.params;
-    const { content } = req.params;
+    const { content } = req.body;
     const userId = req.user._id;
     if (!isValidObjectId(tweetId)) {
         throw new ApiError(400, "Invalid tweet Id")
@@ -97,5 +104,6 @@ export {
     createTweet,
     getUserTweets,
     updateTweet,
-    deleteTweet
+    deleteTweet,
+    getAllTweets
 }

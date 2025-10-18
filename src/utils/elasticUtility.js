@@ -1,4 +1,5 @@
 import searchClient from "./elasticClient.js";
+import { logger } from "../logger.js";
 
 async function createTweetIndex() {
     const indexExists = await searchClient.indices.exists({ index: 'tweets' });
@@ -13,10 +14,10 @@ async function createTweetIndex() {
                 }
             }
         }, { ignore: [400] }); // 400 means index already exists
-        console.log("Tweet index created");
+        logger.info("Tweet index created");
     }
     else {
-        console.log("Tweet index already exists");
+        logger.info("Tweet index already exists");
         return;
     }
 }
@@ -35,31 +36,39 @@ async function createVideoIndex() {
                 }
             }
         }, { ignore: [400] });
-        console.log("Video index created");
+        logger.info("Video index created");
     } else {
-        console.log("Video index already exists");
+        logger.info("Video index already exists");
         return;
     }
 }
 
 async function addIndexedData(change, field) {//send this tweet data after creating it in db
+    const body = field === 'tweets'
+        ? { content: change.fullDocument.content }
+        : {
+            title: change.fullDocument.title,
+            description: change.fullDocument.description
+        };
     await searchClient.index({
         index: field,
         id: change.documentKey._id.toString(),
-        body: {
-            content: change.fullDocument.content,
-        }
+        body: body
     });
     await searchClient.indices.refresh({ index: field });
 }
 
 async function updateIndexedData(change, field) {
+    const body = field === 'tweets'
+        ? { content: change.fullDocument.content }
+        : {
+            title: change.fullDocument.title,
+            description: change.fullDocument.description
+        };
     await searchClient.update({
         index: field,
         id: change.documentKey._id.toString(),
-        body: {
-            doc: change.updateDescription.updatedFields
-        }
+        body: { doc: body }
     });
     await searchClient.indices.refresh({ index: field });
 }
