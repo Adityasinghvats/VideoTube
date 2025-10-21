@@ -1,0 +1,62 @@
+name: 🚀 Deploy Videotube App to Azure VM
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  deploy:
+    name: Deploy to Azure VM
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛎️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy via SSH
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          port: 22
+          script: |
+            set -e
+            echo "🚀 Starting deployment..."
+
+            # Navigate to project directory
+            cd videotube
+
+            # Pull latest changes
+            echo "📥 Pulling latest code..."
+            git pull origin main
+
+            # Copy/update .env file (ensure .env is NOT in git)
+            echo "⚙️ Updating environment variables..."
+            # Option 1: Use secrets to create .env
+            cat > .env << EOF
+            PORT=3000
+            MONGODB_URI=${{ secrets.MONGODB_URI }}
+            CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
+            ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
+            ACCESS_TOKEN_EXPIRY=${{ secrets.ACCESS_TOKEN_EXPIRY }}
+            REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}
+            REFRESH_TOKEN_EXPIRY=${{ secrets.REFRESH_TOKEN_EXPIRY }}
+            CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+            CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+            CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+            CLOUDINARY_URL=${{ secrets.CLOUDINARY_URL }}
+            ELASTICSEARCH_NODE=${{ secrets.ELASTICSEARCH_NODE }}
+            EOF
+
+            # Restart application with PM2
+            echo "🔄 Restarting application..."
+            pm2 restart videotube-app || pm2 start src/index.js --name "videotube-app" --time
+
+            # Save PM2 process list
+            pm2 save
+
+            echo "✅ Deployment complete!"
+            pm2 status
