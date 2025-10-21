@@ -1,23 +1,7 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-      - ./.env
-    container_name: videotube-app
-    ports:
-      - 3000:3000
-    stdin_open: true
-    volumes:
-      - ./:/usr/src/app:cached #bind source code to container
-      - node_modules:/usr/src/app/node_modules #keep node_modules in container separate
-    restart: unless-stopped
-    # networks:
-    #   - videotube-network
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:9.1.5
-    container_name: es-local
+    container_name: es-local-dev
     ports:
       - 9200:9200
       - 9300:9300
@@ -25,16 +9,7 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
     volumes:
-      - esdata:/usr/share/elasticsearch/data
-    restart: unless-stopped
-    # networks:
-    #   - videotube-network
+      - esdata-local:/usr/share/elasticsearch/data
 volumes:
-  node_modules:
+  esdata-local:
     driver: local
-  esdata:
-    driver: local
-# networks:
-#   videotube-network:
-#     name: videotube-network
-#     driver: bridge

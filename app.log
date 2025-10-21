@@ -65,3 +65,5 @@
 {"level":"info","message":"Video index already exists","timestamp":"2025-10-18T14:54:20.964Z"}
 {"level":"info","message":"Video index already exists","timestamp":"2025-10-18T14:55:32.838Z"}
 {"level":"info","message":"Tweet index already exists","timestamp":"2025-10-18T14:55:32.844Z"}
+{"level":"info","message":"Video index created","timestamp":"2025-10-21T14:45:45.942Z"}
+{"level":"info","message":"Tweet index already exists","timestamp":"2025-10-21T14:45:45.992Z"}

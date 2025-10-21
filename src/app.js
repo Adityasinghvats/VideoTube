@@ -3,6 +3,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { swaggerSpec } from "./utils/swagger.js";
 import swaggerUi from "swagger-ui-express";
+import morgan from "morgan";
+import { logger } from "./logger.js";
 
 const app = express()
 
@@ -61,6 +63,24 @@ app.use("/api/v1/likes", likeRouter);
 app.use("/api/v1/tweets", tweetRouter);
 app.use("/api/v1/dashboard", dashboardRouter);
 // app.use("/api/v1/notifications", notificationRouter);
+
+const morganFormat = ":method :url :status :response-time ms";
+
+app.use(
+    morgan(morganFormat, {
+        stream: {
+            write: (message) => {
+                const logObject = {
+                    method: message.split(" ")[0],
+                    url: message.split(" ")[1],
+                    status: message.split(" ")[2],
+                    responseTime: message.split(" ")[3],
+                };
+                logger.info(JSON.stringify(logObject));
+            },
+        },
+    })
+);
 
 app.use(errorHandler)
 
