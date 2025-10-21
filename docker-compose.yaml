@@ -9,12 +9,13 @@ services:
     ports:
       - 3000:3000
     stdin_open: true
-    volumes:
-      - ./:/usr/src/app:cached #bind source code to container
-      - node_modules:/usr/src/app/node_modules #keep node_modules in container separate
     restart: unless-stopped
-    # networks:
-    #   - videotube-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - videotube-network
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:9.1.5
     container_name: es-local
@@ -24,17 +25,24 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     volumes:
       - esdata:/usr/share/elasticsearch/data
     restart: unless-stopped
-    # networks:
-    #   - videotube-network
+    networks:
+      - videotube-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
 volumes:
-  node_modules:
-    driver: local
   esdata:
     driver: local
-# networks:
-#   videotube-network:
-#     name: videotube-network
-#     driver: bridge
+
+networks:
+  videotube-network:
+    name: videotube-network
+    driver: bridge

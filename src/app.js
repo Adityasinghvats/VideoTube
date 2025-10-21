@@ -38,7 +38,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(undefined, {
 // import Routes
 import healthcheckRouter from "./routes/healthcheck.route.js";
 import userRouter from "./routes/user.route.js";
-import searchRouter from "./routes/search.route.js";
+// import searchRouter from "./routes/search.route.js";
 import videoRouter from "./routes/video.route.js";
 import commentRouter from "./routes/comment.route.js";
 import playlistRouter from "./routes/playlist.route.js";
@@ -52,7 +52,7 @@ import { errorHandler } from "./middlewares/error.middlewares.js";
 // routes
 app.use("/api/v1/healthcheck", healthcheckRouter);
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/search", searchRouter);
+// app.use("/api/v1/search", searchRouter);
 app.use("/api/v1/videos", videoRouter);
 app.use("/api/v1/comments", commentRouter);
 app.use("/api/v1/playlists", playlistRouter);

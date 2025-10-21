@@ -11,7 +11,7 @@ config();
 //     }
 // })
 const searchClient = new Client({
-    node: 'http://localhost:9200'
+    node: process.env.ELASTICSEARCH_NODE || 'http://localhost:9200',
 })
 
 async function checkConnection() {
@@ -23,6 +23,6 @@ async function checkConnection() {
     }
 }
 
-checkConnection();
+// checkConnection();
 
 export default searchClient;
