@@ -5,6 +5,11 @@ import { swaggerSpec } from "./utils/swagger.js";
 import swaggerUi from "swagger-ui-express";
 import morgan from "morgan";
 import { logger } from "./logger.js";
+import { metrics, trace } from "@opentelemetry/api";
+
+// instrumentation scope meant to represent a logical unit within the code
+const tracer = trace.getTracer("videotube-server", "1.0.0");
+const meter = metrics.getMeter("videotube-server", "1.0.0");
 
 const app = express()
 
