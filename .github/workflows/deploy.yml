@@ -28,6 +28,9 @@ jobs:
             # Navigate to your project directory
             cd ${{ secrets.PROJECT_DIR }}
 
+            echo "Removing config.yaml from git tracking if it exists..."
+            git rm --cached config.yaml 2>/dev/null || true
+
             echo "Pulling latest changes..."
             git pull origin main
 

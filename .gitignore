@@ -1,4 +1,10 @@
 node_modules
 .env
 .vscode
+.env.*
+!.env.example
 config.yaml
+app.log
+public/temp/*
+!public/temp/.gitkeep
+.DS_Store
