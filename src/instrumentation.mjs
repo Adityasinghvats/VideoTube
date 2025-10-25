@@ -15,6 +15,9 @@ import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-proto';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-proto';
 import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston';
 import { logger } from './logger.js';
+import { config } from 'dotenv';
+
+config();
 
 const sdk = new NodeSDK({
     resource: resourceFromAttributes({
@@ -22,17 +25,17 @@ const sdk = new NodeSDK({
         [ATTR_SERVICE_VERSION]: '1.0.0',
     }),
     traceExporter: new OTLPTraceExporter({
-        url: 'http://localhost:4318/v1/traces',
+        url: `${process.env.OTEL_NODE}/v1/traces`,
     }),
     metricReader: new PeriodicExportingMetricReader({
         exporter: new OTLPMetricExporter({
-            url: 'http://localhost:4318/v1/metrics',
+            url: `${process.env.OTEL_NODE}/v1/metrics`,
         }),
         exportIntervalMillis: 60000,
     }),
     logRecordProcessors: [
         new BatchLogRecordProcessor(new OTLPLogExporter({
-            url: 'http://localhost:4318/v1/logs',
+            url: `${process.env.OTEL_NODE}/v1/logs`,
         })),
     ],
     instrumentations: [
