@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { search } from "../controllers/search.controller.js";
+import { verifyJWT } from "../middlewares/auth.middlewares.js";
 
 const router = Router();
 
@@ -140,6 +141,6 @@ const router = Router();
  *                   success: false
  *                   errors: []
  */
-router.get("/s", search);
+router.get("/s", verifyJWT, search);
 
 export default router;
