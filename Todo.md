@@ -1,5 +1,2 @@
 - setup CI/CD using testing and github actions to make docker image and uplaod to my docker hub.
-- setup obersvalbiltiy and logging using OTEL
-- setup backnground processing and worker threads and bullmq queue for file upload
-- setup logging using better stack blog
-- send notifications using fcm or websockets
+- give an endpoint to open websockets connection and then send realtime updates like some one commented on the video

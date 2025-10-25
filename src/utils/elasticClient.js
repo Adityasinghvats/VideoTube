@@ -1,5 +1,6 @@
 import { Client } from '@elastic/elasticsearch';
 import { config } from 'dotenv';
+import { logger } from '../logger.js';
 
 config();
 
@@ -17,12 +18,12 @@ const searchClient = new Client({
 async function checkConnection() {
     try {
         const pong = await searchClient.ping();
-        console.log('Elasticsearch cluster is up!');
+        logger.info('Elasticsearch cluster is up!');
     } catch (err) {
-        console.error('Elasticsearch cluster is down!', err);
+        logger.error('Elasticsearch cluster is down!', err);
     }
 }
 
-// checkConnection();
+checkConnection();
 
 export default searchClient;

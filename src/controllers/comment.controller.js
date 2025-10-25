@@ -62,7 +62,6 @@ const getVideoComments = asyncHandler(async (req, res) => {
             $limit: parseInt(limit),
         }
     ])
-    console.log(comments);
 
     if (!comments?.length) {
         throw new ApiError(404, "Comments not found");

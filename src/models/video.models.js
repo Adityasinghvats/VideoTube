@@ -46,21 +46,21 @@ videoSchema.plugin(mongooseAggregatePaginate);
 
 export const Video = mongoose.model("Video", videoSchema);
 
-// const changeStream = Video.watch([], { fullDocument: 'updateLookup' });
-// changeStream.on('change', async (change) => {
-//     logger.info('Change detected in video model', { operationType: change.operationType, documentKey: change.documentKey });
+const changeStream = Video.watch([], { fullDocument: 'updateLookup' });
+changeStream.on('change', async (change) => {
+    logger.info('Change detected in video model', { operationType: change.operationType, documentKey: change.documentKey });
 
-//     switch (change.operationType) {
-//         case 'insert':
-//             addIndexedData(change, 'videos');
-//             break;
+    switch (change.operationType) {
+        case 'insert':
+            addIndexedData(change, 'videos');
+            break;
 
-//         case 'update':
-//             updateIndexedData(change, 'videos');
-//             break;
+        case 'update':
+            updateIndexedData(change, 'videos');
+            break;
 
-//         case 'delete':
-//             deleteIndexedData(change, 'videos');
-//             break;
-//     }
-// });
+        case 'delete':
+            deleteIndexedData(change, 'videos');
+            break;
+    }
+});

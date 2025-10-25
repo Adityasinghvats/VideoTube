@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import fs from "fs/promises";;
 import dotenv from 'dotenv';
+import { logger } from '../logger.js';
 dotenv.config()
 
 // Configuration
@@ -19,10 +20,10 @@ const uploadOnCloudinary = async (localfilepath) => {
                 resource_type: 'auto'
             }
         )
-        console.log("file is uploaded: at src", response.url)
+        logger.info("file is uploaded: at src", response.url)
         return response;
     } catch (error) {
-        console.log("Error on cloudinary upload", error)
+        logger.error("Error on cloudinary upload", error)
         return null;
     } finally {
         try {
@@ -36,10 +37,10 @@ const uploadOnCloudinary = async (localfilepath) => {
 const deleteFromCloudinary = async (publicId) => {
     try {
         const result = await cloudinary.uploader.destroy(publicId)
-        console.log("deleted from clodudinary", publicId);
+        logger.info("deleted from cloudinary", publicId);
 
     } catch (error) {
-        console.log("error deleting cloudinary", error);
+        logger.error("error deleting cloudinary", error);
         return null
     }
 }

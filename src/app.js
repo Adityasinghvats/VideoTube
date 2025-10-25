@@ -3,6 +3,13 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { swaggerSpec } from "./utils/swagger.js";
 import swaggerUi from "swagger-ui-express";
+import morgan from "morgan";
+import { logger } from "./logger.js";
+import { metrics, trace } from "@opentelemetry/api";
+
+// instrumentation scope meant to represent a logical unit within the code
+const tracer = trace.getTracer("videotube-server", "1.0.0");
+const meter = metrics.getMeter("videotube-server", "1.0.0");
 
 const app = express()
 
@@ -38,7 +45,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(undefined, {
 // import Routes
 import healthcheckRouter from "./routes/healthcheck.route.js";
 import userRouter from "./routes/user.route.js";
-// import searchRouter from "./routes/search.route.js";
+import searchRouter from "./routes/search.route.js";
 import videoRouter from "./routes/video.route.js";
 import commentRouter from "./routes/comment.route.js";
 import playlistRouter from "./routes/playlist.route.js";
@@ -52,7 +59,7 @@ import { errorHandler } from "./middlewares/error.middlewares.js";
 // routes
 app.use("/api/v1/healthcheck", healthcheckRouter);
 app.use("/api/v1/users", userRouter);
-// app.use("/api/v1/search", searchRouter);
+app.use("/api/v1/search", searchRouter);
 app.use("/api/v1/videos", videoRouter);
 app.use("/api/v1/comments", commentRouter);
 app.use("/api/v1/playlists", playlistRouter);
@@ -61,6 +68,24 @@ app.use("/api/v1/likes", likeRouter);
 app.use("/api/v1/tweets", tweetRouter);
 app.use("/api/v1/dashboard", dashboardRouter);
 // app.use("/api/v1/notifications", notificationRouter);
+
+const morganFormat = ":method :url :status :response-time ms";
+
+app.use(
+    morgan(morganFormat, {
+        stream: {
+            write: (message) => {
+                const logObject = {
+                    method: message.split(" ")[0],
+                    url: message.split(" ")[1],
+                    status: message.split(" ")[2],
+                    responseTime: message.split(" ")[3],
+                };
+                logger.info(JSON.stringify(logObject));
+            },
+        },
+    })
+);
 
 app.use(errorHandler)
 

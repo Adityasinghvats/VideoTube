@@ -1,0 +1,56 @@
+name: 🚀 Deploy Express App to Azure VM
+
+on:
+  push:
+    branches:
+      - main
+    workflow_dispatch: # Allow manual triggering of the workflow
+
+jobs:
+  deploy:
+    name: Deploy to Azure VM
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛎️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy via SSH
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            set -e
+            echo "Starting deployment..."
+
+            # Navigate to your project directory
+            cd ${{ secrets.PROJECT_DIR }}
+
+            echo "Pulling latest changes..."
+            git pull origin main
+
+            # Copy/update .env file (ensure .env is NOT in git)
+            echo "⚙️ Updating environment variables..."
+            # Option 1: Use secrets to create .env
+            cat > .env << EOF
+            PORT=3000
+            MONGODB_URI=${{ secrets.MONGODB_URI }}
+            CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
+            ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
+            ACCESS_TOKEN_EXPIRY=${{ secrets.ACCESS_TOKEN_EXPIRY }}
+            REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}
+            REFRESH_TOKEN_EXPIRY=${{ secrets.REFRESH_TOKEN_EXPIRY }}
+            CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+            CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+            CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+            EOF
+
+            echo "Installing dependencies..."
+            npm install --production
+
+            echo "Restarting PM2 process..."
+            pm2 restart express-app || pm2 start server.js --name "express-app"
+
+            echo "✅ Deployment complete!"

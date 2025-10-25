@@ -1,24 +1,95 @@
 import mongoose from "mongoose"
 import { Video } from "../models/video.models.js"
 import { Like } from "../models/like.models.js"
+import { Subscription } from "../models/subscription.models.js";
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 
 const getChannelStats = asyncHandler(async (req, res) => {
-    // TODO: Get the channel stats like total video views, total subscribers, total videos, total likes etc.
     // find all videos where user is owner and then for all those videos aggregate views and count them
+    const userId = req.user._id;
+    if (!userId) {
+        throw new ApiError(401, "User not found")
+    }
+    const owner = new mongoose.Types.ObjectId(userId);
+
+    const totalVideos = await Video.countDocuments({ owner });
+    const totalViews = await Video.aggregate([
+        { $match: { owner } },
+        {
+            $group: {
+                _id: null,
+                totalViews: { $sum: "$views" }
+            }
+        }
+    ])
     // find count of all Subscriptions where channel value is same as user
+    const totalSubscriptions = await Subscription.countDocuments({ channel: owner });
     // find count of all the likes for comments and video where video owner is user
+    const totalLikesOnVideos = await Like.aggregate([
+        {
+            $lookup: {
+                from: "videos",
+                localField: "video",
+                foreignField: "_id",
+                as: "videoDetails"
+            }
+        },
+        { $unwind: "$videoDetails" },
+        {
+            $match: {
+                "videoDetails.owner": owner
+            }
+        }
+    ])
+    const totalLikesOnComments = await Like.aggregate([
+        {
+            $lookup: {
+                from: "comments",
+                localField: "comment",
+                foreignField: "_id",
+                as: "commentDetails"
+            }
+        },
+        { $unwind: "$commentDetails" },
+        {
+            $match: {
+                "commentDetails.owner": owner
+            }
+        }
+    ])
     // find count of all the likes for tweets where owner is user
+    const totalLikesOnTweets = await Like.aggregate([
+        {
+            $lookup: {
+                from: "tweets",
+                localField: "tweet",
+                foreignField: "_id",
+                as: "tweetDetails"
+            }
+        },
+        { $unwind: "$tweetDetails" },
+        {
+            $match: {
+                "tweetDetails.owner": owner
+            }
+        }
+    ])
+    const totalLikes = totalLikesOnVideos.length + totalLikesOnComments.length + totalLikesOnTweets.length;
+
+    const stats = {
+        totalVideos,
+        totalViews: totalViews[0]?.totalViews || 0,
+        totalSubscriptions,
+        totalLikes
+    }
     return res
         .status(200)
-        .json(new ApiResponse(200, "Stats fetched successfully"));
+        .json(new ApiResponse(200, stats, "Stats fetched successfully"));
 })
 
 const getChannelVideos = asyncHandler(async (req, res) => {
-    // TODO: Get all the videos uploaded by the channel
-    // find all videos where the owner is current user and return the array of videos
     const { page = 1, limit = 10, query, sortBy, sortType } = req.query
     const userId = req.user._id
     if (!userId) {
