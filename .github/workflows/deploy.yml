@@ -44,6 +44,7 @@ jobs:
             CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
             CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
             CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+            CLOUDINARY_URL=${{ secrets.CLOUDINARY_URL }}
             ELASTICSEARCH_NODE=${{ secrets.ELASTICSEARCH_NODE }}
             OTEL_NODE=http://otel-collector:4318
             EOF
@@ -99,8 +100,8 @@ jobs:
             EOF
 
             echo "Installing dependencies..."
-            docker-compose down
-            docker-compose build --no-cache
-            docker-compose up -d
+            docker compose down
+            docker compose build --no-cache
+            docker compose up -d
 
             echo "✅ Deployment complete!"
