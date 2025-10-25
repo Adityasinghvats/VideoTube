@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-    workflow_dispatch: # Allow manual triggering of the workflow
+  workflow_dispatch: # Allow manual triggering of the workflow
 
 jobs:
   deploy:
@@ -33,7 +33,6 @@ jobs:
 
             # Copy/update .env file (ensure .env is NOT in git)
             echo "⚙️ Updating environment variables..."
-            # Option 1: Use secrets to create .env
             cat > .env << EOF
             PORT=3000
             MONGODB_URI=${{ secrets.MONGODB_URI }}
@@ -45,12 +44,63 @@ jobs:
             CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
             CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
             CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+            ELASTICSEARCH_NODE=${{ secrets.ELASTICSEARCH_NODE }}
+            OTEL_NODE=http://otel-collector:4318
+            EOF
+
+            # Update config.yaml with Better Stack token
+            echo "⚙️ Updating OTEL config..."
+            cat > config.yaml << EOF
+            receivers:
+              hostmetrics:
+                collection_interval: 60s
+                scrapers:
+                  cpu:
+                  memory:
+                  disk:
+                  network:
+              otlp:
+                protocols:
+                  grpc:
+                    endpoint: 0.0.0.0:4317
+                  http:
+                    endpoint: 0.0.0.0:4318
+              prometheus:
+                config:
+                  scrape_configs:
+                    - job_name: "otel-collector-metrics"
+                      scrape_interval: 60s
+                      static_configs:
+                        - targets: ["0.0.0.0:8888"]
+
+            exporters:
+              otlphttp/betterstack:
+                endpoint: "${{ secrets.BETTERSTACK_ENDPOINT }}"
+                headers:
+                  Authorization: "Bearer ${{ secrets.BETTERSTACK_TOKEN }}"
+
+            processors:
+              batch:
+
+            service:
+              pipelines:
+                metrics/betterstack:
+                  receivers: [hostmetrics, otlp, prometheus]
+                  processors: [batch]
+                  exporters: [otlphttp/betterstack]
+                logs/betterstack:
+                  receivers: [otlp]
+                  processors: [batch]
+                  exporters: [otlphttp/betterstack]
+                traces/betterstack:
+                  receivers: [otlp]
+                  processors: [batch]
+                  exporters: [otlphttp/betterstack]
             EOF
 
             echo "Installing dependencies..."
-            npm install --production
-
-            echo "Restarting PM2 process..."
-            pm2 restart express-app || pm2 start server.js --name "express-app"
+            docker-compose down
+            docker-compose build --no-cache
+            docker-compose up -d
 
             echo "✅ Deployment complete!"
