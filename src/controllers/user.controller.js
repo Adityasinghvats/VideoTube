@@ -5,6 +5,7 @@ import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from 'jsonwebtoken';
 import mongoose from "mongoose";
+import { logger } from "../logger.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -22,7 +23,7 @@ const generateAccessAndRefreshToken = async (userId) => {
         await user.save({ validateBeforeSave: false })
         return { accessToken, refreshToken }
     } catch (error) {
-        console.log("Failed to generate access and refresh token", error);
+        logger.error("Failed to generate access and refresh token", error);
 
         throw new ApiError(500, "Failed to generate access and refresh token")
     }
@@ -60,18 +61,18 @@ const registerUser = asyncHandler(async (req, res) => {
     let avatar;
     try {
         avatar = await uploadOnCloudinary(avatarLocalPath)
-        console.log("Uploaded avatar")
+        logger.info("Uploaded avatar")
     } catch (error) {
-        console.log("Error uploading avatar", error);
+        logger.error("Error uploading avatar", error);
         throw new ApiError(500, "Failed to upload avatar")
     }
 
     let coverImage;
     try {
         coverImage = await uploadOnCloudinary(coverLocalPath)
-        console.log("Uploaded coverImage")
+        logger.info("Uploaded coverImage")
     } catch (error) {
-        console.log("Error uploading coverImage", error);
+        logger.error("Error uploading coverImage", error);
         throw new ApiError(500, "Failed to upload coverImage")
     }
 
@@ -97,7 +98,7 @@ const registerUser = asyncHandler(async (req, res) => {
             .status(201)
             .json(new ApiResponse(201, createdUser, "User registered successfully"))
     } catch (error) {
-        console.log("user creation failed");
+        logger.error("user creation failed", error);
         if (avatar) {
             await deleteFromCloudinary(avatar.public_id)
         }

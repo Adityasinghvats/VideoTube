@@ -1,9 +1,7 @@
 /*instrumentation.mjs*/
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-node';
 import {
     PeriodicExportingMetricReader,
-    ConsoleMetricExporter,
 } from '@opentelemetry/sdk-metrics';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import {
@@ -11,30 +9,38 @@ import {
     ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { ConsoleLogRecordExporter, SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
+import { BatchLogRecordProcessor } from '@opentelemetry/sdk-logs';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-proto';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-proto';
+import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston';
+import { logger } from './logger.js';
 
 const sdk = new NodeSDK({
     resource: resourceFromAttributes({
         [ATTR_SERVICE_NAME]: 'videotube-backend',
         [ATTR_SERVICE_VERSION]: '1.0.0',
     }),
-    traceExporter: new OTLPTraceExporter(),
-    metricReaders: new PeriodicExportingMetricReader({
-        exporter: new OTLPMetricExporter(),
-        exportIntervalMillis: 60000, // Export metrics every 60 seconds
+    traceExporter: new OTLPTraceExporter({
+        url: 'http://localhost:4318/v1/traces',
+    }),
+    metricReader: new PeriodicExportingMetricReader({
+        exporter: new OTLPMetricExporter({
+            url: 'http://localhost:4318/v1/metrics',
+        }),
+        exportIntervalMillis: 60000,
     }),
     logRecordProcessors: [
-        new SimpleLogRecordProcessor(new OTLPLogExporter()),
+        new BatchLogRecordProcessor(new OTLPLogExporter({
+            url: 'http://localhost:4318/v1/logs',
+        })),
     ],
-    instrumentations: [getNodeAutoInstrumentations()],
-    //traceExporter: new ConsoleSpanExporter(),
-    // metricReader: new PeriodicExportingMetricReader({
-    //     exporter: new ConsoleMetricExporter(),
-    // }),
-    //logRecordProcessors: [new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())],
+    instrumentations: [
+        getNodeAutoInstrumentations(),
+        new WinstonInstrumentation(),
+    ],
 });
 
 sdk.start();
+
+logger.info('OpenTelemetry SDK initialized');
