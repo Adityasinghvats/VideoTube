@@ -2,6 +2,11 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import { config } from 'dotenv';
 config();
 
+// Determine the correct protocol based on environment
+const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+const port = process.env.PORT || 3000;
+const host = process.env.API_BASE_URL || `${protocol}://localhost:${port}`;
+
 const definition = {
     openapi: '3.0.0',
     info: {
@@ -11,8 +16,8 @@ const definition = {
     },
     servers: [
         {
-            url: 'http://localhost:' + (process.env.PORT || 3000),
-            description: 'Local server',
+            url: host,
+            description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Local server',
         },
     ],
 };

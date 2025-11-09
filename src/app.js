@@ -13,10 +13,12 @@ const meter = metrics.getMeter("videotube-server", "1.0.0");
 
 const app = express()
 
+app.set('trust proxy', 1);
+
 // using cors pre-cooked middleware
 app.use(
     cors({
-        origin: process.env.CORS_ORIGIN,
+        origin: process.env.CORS_ORIGIN || '*',
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization']
@@ -31,7 +33,7 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 app.get('/api-docs.json', (req, res) => {
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const baseUrl = process.env.API_BASE_URL || `${req.protocol}://${req.get('host')}`;
     const spec = { ...swaggerSpec, servers: [{ url: baseUrl }] };
     res.setHeader('Content-Type', 'application/json');
     res.send(spec);
