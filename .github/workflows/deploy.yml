@@ -50,6 +50,7 @@ jobs:
             CLOUDINARY_URL=${{ secrets.CLOUDINARY_URL }}
             ELASTICSEARCH_NODE=${{ secrets.ELASTICSEARCH_NODE }}
             OTEL_NODE=http://otel-collector:4318
+            API_BASE_URL=${{ secrets.API_BASE_URL }}
             EOF
 
             # Update config.yaml with Better Stack token
